@@ -1006,28 +1006,58 @@ sixeightfive3sdtwo"
     );
 }
 
+const TOKENS_MAPA: [(&str, usize); 18] = [
+    ("one", 1),
+    ("two", 2),
+    ("three", 3),
+    ("four", 4),
+    ("five", 5),
+    ("six", 6),
+    ("seven", 7),
+    ("eight", 8),
+    ("nine", 9),
+    ("1", 1),
+    ("2", 2),
+    ("3", 3),
+    ("4", 4),
+    ("5", 5),
+    ("6", 6),
+    ("7", 7),
+    ("8", 8),
+    ("9", 9),
+];
+
 fn resolver(entrada: &str) -> usize {
     entrada
-        .split("\n")
-        .map(|linea: &str| {
-            // Primer método: más seguro porque no utiliza unwrap, pero más ineficiente porque convierte entre to_string siempre
-            let mut primer_digito = 0;
-            for letra in linea.chars() {
-                if let Ok(x) = letra.to_string().parse::<usize>() {
-                    primer_digito = x;
-                    break;
+        .lines()
+        .map(|linea| {
+            let primer_digito = (|| {
+                for indice in 0..linea.len() {
+                    for (token, numero) in TOKENS_MAPA {
+                        if indice + token.len() > linea.len() {
+                            continue;
+                        }
+                        if token == &linea[indice..indice + token.len()] {
+                            return numero;
+                        }
+                    }
                 }
-            }
+                panic!()
+            })();
 
-            // Segundo método: viceversa al anterior
-            let mut ultimo_digito = 0;
-            for letra in linea.chars().rev() {
-                if letra.is_numeric() {
-                    ultimo_digito = letra.to_string().parse::<usize>().unwrap();
-                    break;
+            let ultimo_digito = (|| {
+                for indice in (0..linea.len()).rev() {
+                    for (token, numero) in TOKENS_MAPA {
+                        if indice + token.len() > linea.len() {
+                            continue;
+                        }
+                        if token == &linea[indice..indice + token.len()] {
+                            return numero;
+                        }
+                    }
                 }
-            }
-
+                panic!()
+            })();
             primer_digito * 10 + ultimo_digito
         })
         .sum()
@@ -1039,11 +1069,14 @@ mod tests {
 
     #[test]
     fn test() {
-        let entrada = "1abc2
-pqr3stu8vwx
-a1b2c3d4e5f
-treb7uchet";
+        let entrada = "two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen";
 
-        assert_eq!(resolver(entrada), 142);
+        assert_eq!(resolver(entrada), 281);
     }
 }
